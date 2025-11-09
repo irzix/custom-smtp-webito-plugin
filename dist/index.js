@@ -40,22 +40,47 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var axios_1 = __importDefault(require("axios"));
 var process_1 = __importDefault(require("process"));
 var webito_plugin_sdk_1 = __importDefault(require("webito-plugin-sdk"));
+var nodemailer_1 = __importDefault(require("nodemailer"));
 var starter = new webito_plugin_sdk_1.default.WebitoPlugin('starter');
-starter.registerHook(webito_plugin_sdk_1.default.hooks.messagesCreate, function (_a) {
+starter.registerHook(webito_plugin_sdk_1.default.hooks.emailCreate, function (_a) {
     var variables = _a.variables, data = _a.data;
     return __awaiter(void 0, void 0, void 0, function () {
-        var create;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0: return [4 /*yield*/, axios_1.default.get("https://api.kavenegar.com/v1/".concat(variables.apikey, "/sms/send.json?message=").concat(data.message, "&receptor=").concat(data.phone))];
+        var smtp, _b;
+        return __generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    smtp = nodemailer_1.default.createTransport({
+                        host: variables.host,
+                        port: variables.port,
+                        secure: variables.port === 465,
+                        auth: {
+                            user: variables.username,
+                            pass: variables.password
+                        }
+                    });
+                    _c.label = 1;
                 case 1:
-                    create = _b.sent();
+                    _c.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, smtp.sendMail({
+                            from: variables.username,
+                            to: data.email,
+                            subject: data.subject || '',
+                            html: data.html || undefined,
+                            text: data.message || data.html || undefined
+                        })];
+                case 2:
+                    _c.sent();
                     return [2 /*return*/, {
-                            status: create.data.return.status == 200 ? true : false
+                            status: true
                         }];
+                case 3:
+                    _b = _c.sent();
+                    return [2 /*return*/, {
+                            status: false
+                        }];
+                case 4: return [2 /*return*/];
             }
         });
     });
