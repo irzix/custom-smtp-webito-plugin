@@ -9,31 +9,30 @@ const starter = new webito.WebitoPlugin('starter');
 starter.registerHook(
     webito.hooks.emailCreate,
     async ({ variables, data }: { variables: { host: string, port: number, username: string, password: string }, data: emailCreate_input }) => {
-        const smtp = nodemailer.createTransport({
-            host: variables.host,
-            port: variables.port,
-            secure: variables.port === 465,
-            auth: {
-                user: variables.username,
-                pass: variables.password
-            }
-        });
-
         try {
-            await smtp.sendMail({
+            const smtp = nodemailer.createTransport({
+                host: variables.host,
+                port: variables.port,
+                auth: {
+                    user: variables.username,
+                    pass: variables.password
+                }
+            });
+            const result = await smtp.sendMail({
                 from: variables.username,
                 to: data.email,
                 subject: data.subject || '',
-                html: data.html || undefined,
-                text: data.message || data.html || undefined
+                html: data.html || data.message || '',
             });
-            
+
             return {
-                status: true
+                status: result.accepted.length > 0,
+                data: result
             };
-        } catch {
+        } catch (error) {
             return {
-                status: false
+                status: false,
+                data: JSON.stringify(error)
             };
         }
     });

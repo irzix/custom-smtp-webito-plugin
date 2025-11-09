@@ -47,40 +47,38 @@ var starter = new webito_plugin_sdk_1.default.WebitoPlugin('starter');
 starter.registerHook(webito_plugin_sdk_1.default.hooks.emailCreate, function (_a) {
     var variables = _a.variables, data = _a.data;
     return __awaiter(void 0, void 0, void 0, function () {
-        var smtp, _b;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var smtp, result, error_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
+                    _b.trys.push([0, 2, , 3]);
                     smtp = nodemailer_1.default.createTransport({
                         host: variables.host,
                         port: variables.port,
-                        secure: variables.port === 465,
                         auth: {
                             user: variables.username,
                             pass: variables.password
                         }
                     });
-                    _c.label = 1;
-                case 1:
-                    _c.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, smtp.sendMail({
                             from: variables.username,
                             to: data.email,
                             subject: data.subject || '',
-                            html: data.html || undefined,
-                            text: data.message || data.html || undefined
+                            html: data.html || data.message || '',
                         })];
+                case 1:
+                    result = _b.sent();
+                    return [2 /*return*/, {
+                            status: result.accepted.length > 0,
+                            data: result
+                        }];
                 case 2:
-                    _c.sent();
+                    error_1 = _b.sent();
                     return [2 /*return*/, {
-                            status: true
+                            status: false,
+                            data: JSON.stringify(error_1)
                         }];
-                case 3:
-                    _b = _c.sent();
-                    return [2 /*return*/, {
-                            status: false
-                        }];
-                case 4: return [2 /*return*/];
+                case 3: return [2 /*return*/];
             }
         });
     });
